@@ -2,7 +2,7 @@ import logging
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from configs.base_config import *
-from forms import LogInForms, SignupForm, ScheduledForm
+from app.templates import LogInForms, SignupForm
 
 # creating an instance of my app.
 app = Flask(__name__)

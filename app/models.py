@@ -1,8 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import Integer
 from flask_login import UserMixin
 from datetime import datetime
-from . import db
+from . import db, login_manager
 
 
 class User(db.model, UserMixin):
@@ -62,6 +61,16 @@ class Pitch(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    @classmethod
+    def get_pitches(cls, category):
+        pitches = Pitch.query.filter_by(category=category).all()
+        return pitches
+
+    @classmethod
+    def get_pitch(cls, id):
+        pitch = Pitch.query.filter_by(id=id).first()
+        return pitch
+
     def __repr__(self):
         return f'Pitch {self.post}'
 
@@ -77,3 +86,15 @@ class Comment(db.Model):
     def save_comment(self):
         db.session.add(self)
         db.session.commit()
+
+    @classmethod
+    def get_comments(cls, pitch_id):
+        comments = Comment.query.filter_by(pitch_id=pitch_id).all()
+
+    def __repr__(self):
+        return f"comment:{self.comment}"
+
+
+@login_manager.user_loader
+def load_user(author_id):
+    return User.query.get(int(author_id))
