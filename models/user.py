@@ -16,3 +16,31 @@ class User(db.model, UserMixin):
     profile_pic_path = db.Column(db.String())
     pitch = db.relationship('Pitch', backref='user', lazy='dynamic')
     comment = db.relationship('Comment', backref='user', lazy='dynamic')
+
+
+@property
+def password(self):
+    raise AttributeError('You cannot read this attribute')
+
+
+@password.setter
+def password(self, password):
+    self.password_hash = generate_password_hash(password)
+
+
+def verify_password(self, password):
+    return check_password_hash(self.password_hash, password)
+
+
+def save_u(self):
+    db.session.add(self)
+    db.session.commit()
+
+
+def delete(self):
+    db.session.delete(self)
+    db.session.commit()
+
+
+def __repr__(self):
+    return f'User {self.username}'
