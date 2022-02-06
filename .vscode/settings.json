@@ -1,0 +1,9 @@
+{
+    "editor.formatOnSave": true,
+    // "python.linting.pylintArgs": [
+    //     "--load-plugins",
+    //     "pylint_flask"
+    // ],
+    "python.defaultInterpreterPath": "/Users/nancyndungu/Desktop/Moringa School Projects/pitch-app/pitchapp/bin/python3.exe",
+    "python.formatting.provider": "autopep8"
+}
