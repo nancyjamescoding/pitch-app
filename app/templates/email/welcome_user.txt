@@ -1,3 +1,0 @@
-Hello {{user.username}}
-Welcome to Pitch App! 
-Pitch a one minute idea that will best sell you!!
