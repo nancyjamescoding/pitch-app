@@ -1,61 +1,51 @@
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+from app import db
 from datetime import datetime
-from . import db, login_manager
+from werkzeug.security import generate_password_hash, check_password_hash
+from . import login_manager
+from flask_login import UserMixin
 
 
-class User(db.model, UserMixin):
-
-    __tablename__ = "Users"
-    id = db.Column(db.Integer, primary_key=True, autoincerement=True)
-    username = db.Column(db.String(255), nullable=False, unique=True)
-    email = db.Column(db.String(255), nullable=False)
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(255), index=True, unique=True)
+    email = db.Column(db.String(255), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     bio = db.Column(db.String(255))
     profile_pic_path = db.Column(db.String())
     pitch = db.relationship('Pitch', backref='user', lazy='dynamic')
     comment = db.relationship('Comment', backref='user', lazy='dynamic')
 
+    @property
+    def password(self):
+        raise AttributeError('You cannnot read the password attribute')
 
-@property
-def password(self):
-    raise AttributeError('You cannot read this attribute')
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
 
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
-@password.setter
-def password(self, password):
-    self.password_hash = generate_password_hash(password)
+    def __repr__(self):
+        return f'User {self.username}'
 
-
-def verify_password(self, password):
-    return check_password_hash(self.password_hash, password)
-
-
-def save_user(self):
-    db.session.add(self)
-    db.session.commit()
-
-
-def delete(self):
-    db.session.delete(self)
-    db.session.commit()
-
-
-def __repr__(self):
-    return f'User {self.username}'
+    @login_manager.user_loader
+    def load_user(author_id):
+        return User.query.get(int(author_id))
 
 
 class Pitch(db.Model):
     __tablename__ = 'pitches'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    post = db.Column(db.Text(), nullable=False)
-    comment = db.relationship('Comment', backref='pitch', lazy='dynamic')
-    upvote = db.relationship('Upvote', backref='pitch', lazy='dynamic')
-    downvote = db.relationship('Downvote', backref='pitch', lazy='dynamic')
+    body = db.Column(db.String(140))
+    content = db.Column(db.String)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    category = db.Column(db.String)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    time = db.Column(db.DateTime, default=datetime.utcnow)
-    category = db.Column(db.String(255), index=True, nullable=False)
+    comment = db.relationship('Comment', backref='pitch_id', lazy='dynamic')
+    likes = db.Column(db.Integer)
+    dislikes = db.Column(db.Integer)
 
     def save_pitch(self):
         db.session.add(self)
@@ -71,30 +61,19 @@ class Pitch(db.Model):
         pitch = Pitch.query.filter_by(id=id).first()
         return pitch
 
-    def __repr__(self):
-        return f'Pitch {self.post}'
-
 
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
-    comment = db.Column(db.Text(), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    pitch_id = db.Column(db.Integer, db.ForeignKey(
-        'pitches.id'), nullable=False)
+    comment = db.Column(db.String)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    pitch = db.Column(db.Integer, db.ForeignKey('pitches.id'))
 
-    def save_comment(self):
+    def save_comments(self):
         db.session.add(self)
         db.session.commit()
 
     @classmethod
-    def get_comments(cls, pitch_id):
-        comments = Comment.query.filter_by(pitch_id=pitch_id).all()
-
-    def __repr__(self):
-        return f"comment:{self.comment}"
-
-
-@login_manager.user_loader
-def load_user(author_id):
-    return User.query.get(int(author_id))
+    def get_comments(cls, pitch):
+        comments = Comment.query.filter_by(pitch_id=pitch).all()
+        return comments

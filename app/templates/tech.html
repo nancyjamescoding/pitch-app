@@ -1,0 +1,10 @@
+{%extends 'base.html' %}
+{% import 'macros.html' as macro %}
+{%block content%}
+
+<div>
+    <h1>Interview Pitches</h1>
+    {{pitches.body}}
+    {{macro.displayPitches(pitches)}}
+</div>
+{%endblock%}

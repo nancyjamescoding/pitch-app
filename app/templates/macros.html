@@ -1,0 +1,27 @@
+{%macro displayPitches(pitches) %}
+<div class="container">
+    <div class="row">
+
+        <div class="col-md-6" {% for pitch in pitches %}>
+            <div class="container">
+
+                <h1>{{pitch.body}}</h1>
+                <p>{{pitch.content}}</p>
+                <p>{{pitch.user.username}} <a href="/pitch/{{pitch.id}}"> <button
+                            class="btn btn-primary">View-pitch</button></a></p>
+            </div>
+
+            {%endfor%}
+        </div>
+    </div>
+</div>
+{%endmacro%}
+
+{%macro displayComments(comments)%}
+{% for comment in comments %}
+<div>
+    <h1>{{comment.user.username}}</h1>
+    <p>{{comment.comment}}</p>
+</div>
+{%endfor%}
+{%endmacro%}
